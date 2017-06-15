@@ -37,12 +37,18 @@ class ChannelController extends Controller
 
     public function getMedia($channelId)
     {
-        return response()->json(Channel::findOrFail($channelId)->media()->with('channel')->get());
+        return response()->json(
+            Channel::findOrFail($channelId)
+            ->media()
+            ->with('channel')
+            ->withCount('likes', 'comments')
+            ->get()
+        );
     }
 
     public function popular()
     {
-        $channels = Channel::withCount('subscribers')->orderBy('subscribers_count', 'desc')->get()->take(10);
+        $channels = Channel::withCount('subscribers', 'likes', 'comments')->orderBy('subscribers_count', 'desc')->get()->take(10);
 
         return response()->json($channels);
     }
@@ -78,7 +84,7 @@ class ChannelController extends Controller
         return response('', 204);
     }
 
-    public function comment($channelId)
+    public function createComment($channelId)
     {
         $channel = Channel::findOrFail($channelId);
         $comment = $channel->comments()->create([
@@ -87,6 +93,11 @@ class ChannelController extends Controller
         ]);
 
         return response()->json(Comment::find($comment->id));
+    }
+
+    public function getComments($channelId)
+    {
+        return response()->json(Channel::findOrFail($channelId)->comments);
     }
 
 //    public function updateTags($formId)

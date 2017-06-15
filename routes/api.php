@@ -15,7 +15,7 @@ use Illuminate\Http\Request;
 
 Route::post('auth/login', 'AuthController@login');
 
-Route::post('users', 'AuthController@reg');
+Route::post('auth/reg', 'AuthController@reg');
 
 
 Route::group(['middleware' => ['auth:api']] , function () {
@@ -24,8 +24,16 @@ Route::group(['middleware' => ['auth:api']] , function () {
     Route::get('channels/popular', 'ChannelController@popular');
     Route::get('channels/{channelId}/media', 'ChannelController@getMedia');
     Route::get('channels/{channelId}', 'ChannelController@getChannel');
+    Route::post('channels/{channelId}/like', 'ChannelController@like');
+    Route::post('channels/{channelId}/dislike', 'ChannelController@dislike');
+    Route::post('channels/{channelId}/comments/create', 'ChannelController@createComment');
+    Route::get('channels/{channelId}/comments', 'ChannelController@getComments');
 
     Route::get('media/subscribed', 'MediaController@getLatestSubscribedMedia');
+    Route::post('media/{mediaId}/like', 'MediaController@like');
+    Route::post('media/{mediaId}/dislike', 'MediaController@dislike');
+    Route::post('media/{mediaId}/comments/create', 'MediaController@createComments');
+    Route::get('channels/{channelId}/comments', 'MediaController@getComments');
     
     Route::get('users/me', 'UserController@getMe');
 });

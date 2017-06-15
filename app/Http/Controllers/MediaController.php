@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Ramsey\Uuid\Uuid;
 use Image;
+use Auth;
 
 class MediaController extends Controller
 {
@@ -65,7 +66,7 @@ class MediaController extends Controller
                 $join->on('channels.id', '=', 'channel_user.channel_id')
                     ->where('channel_user.user_id', $user->id);
             });
-        })->with('channel')->take(20)->get(); //we can use pagination in next step...
+        })->with('channel')->withCount('likes', 'comments')->take(20)->get(); //we can use pagination in next step...
         return response()->json($media);
     }
 
@@ -78,7 +79,7 @@ class MediaController extends Controller
         return response('', 204);
     }
 
-    public function unlike($mediaId)
+    public function dislike($mediaId)
     {
         $media = Media::findOrFail($mediaId);
         $like = $media->likes()->whereUserId(Auth::id())->first();
@@ -91,7 +92,7 @@ class MediaController extends Controller
         return response('', 204);
     }
 
-    public function comment($mediaId)
+    public function createComment($mediaId)
     {
         $media = Media::findOrFail($mediaId);
         $comment = $media->comments()->create([
@@ -100,5 +101,10 @@ class MediaController extends Controller
         ]);
 
         return response()->json(Comment::find($comment->id));
+    }
+
+    public function getComments($mediaId)
+    {
+        return response()->json(Media::findOrFail($mediaId)->comments);
     }
 }

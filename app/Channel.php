@@ -2,11 +2,14 @@
 
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Model,
+    Auth;
 
 class Channel extends Model
 {
     protected $guarded = [];
+    
+    protected $appends = ['is_liked'];
 
     public function user()
     {
@@ -32,5 +35,9 @@ class Channel extends Model
     {
         return $this->morphMany(Comment::class, 'commentable');
     }
-    
+
+    public function getIsLikedAttribute()
+    {
+        return $this->likes()->pluck('likable_id')->contains(Auth::id());
+    }
 }
