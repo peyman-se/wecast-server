@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateChannelUserTable extends Migration
+class CreateCommentsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,14 +13,14 @@ class CreateChannelUserTable extends Migration
      */
     public function up()
     {
-        Schema::create('channel_user', function (Blueprint $table) {
-            $table->increments('id');
+        Schema::create('comments', function (Blueprint $table) {
+            $table->integer('commentable_id');
+            $table->string('commentable_type');
             $table->unsignedInteger('user_id');
-            $table->unsignedInteger('channel_id');
+            $table->string('body');
             $table->timestamps();
 
             $table->foreign('user_id')->references('id')->on('users');
-            $table->foreign('channel_id')->references('id')->on('channels');
         });
     }
 
@@ -31,6 +31,6 @@ class CreateChannelUserTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('channel_user');
+        Schema::dropIfExists('comments');
     }
 }

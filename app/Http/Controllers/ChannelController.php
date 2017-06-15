@@ -3,7 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Channel;
-use App\ChannelSubscription;
+use App\Comment;
+use App\Like;
 use Illuminate\Http\Request;
 use Auth;
 
@@ -54,6 +55,38 @@ class ChannelController extends Controller
     public function countChannels()
     {
         return response()->json(['channel_counts' => Channel::count()]);
+    }
+
+    public function like($channelId)
+    {
+        $channel = Channel::findOrFail($channelId);
+        $channel->likes()->create([
+            'user_id' => Auth::id()
+        ]);
+        return response('', 204);
+    }
+
+    public function dislike($channelId)
+    {
+        $channel = Channel::findOrFail($channelId);
+        $like = $channel->likes()->whereUserId(Auth::id())->first();
+        if (!$like) {
+            abort(404);
+        }
+
+        $like->delete();
+        return response('', 204);
+    }
+
+    public function comment($channelId)
+    {
+        $channel = Channel::findOrFail($channelId);
+        $comment = $channel->comments()->create([
+            'user_id' => Auth::id(),
+            'body' => request('body')
+        ]);
+
+        return response()->json(Comment::find($comment->id));
     }
 
 //    public function updateTags($formId)

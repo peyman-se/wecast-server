@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Channel;
+use App\Comment;
 use App\Media;
 use App\User;
 use Carbon\Carbon;
@@ -14,7 +16,9 @@ class MediaController extends Controller
 {
     public function store($channelId)
     {
-        //code...
+        $channel = Channel::findOrFail($channelId);
+        $channel->media()->create(request()->all());
+        return response()->json(Channel::find($channel->id));
     }
 
     public function uploadMedia()
@@ -55,7 +59,7 @@ class MediaController extends Controller
 
     public function getLatestSubscribedMedia()
     {
-        $user = User::find(1);
+        $user = Auth::user();
         $media = Media::whereHas('channel', function ($query) use ($user) {
             $query->join('channel_user', function ($join) use ($user) {
                 $join->on('channels.id', '=', 'channel_user.channel_id')
@@ -63,5 +67,38 @@ class MediaController extends Controller
             });
         })->with('channel')->take(20)->get(); //we can use pagination in next step...
         return response()->json($media);
+    }
+
+    public function like($mediaId)
+    {
+        $media = Media::findOrFail($mediaId);
+        $media->likes()->create([
+            'user_id' => Auth::id()
+        ]);
+        return response('', 204);
+    }
+
+    public function unlike($mediaId)
+    {
+        $media = Media::findOrFail($mediaId);
+        $like = $media->likes()->whereUserId(Auth::id())->first();
+        
+        if (!$like) {
+            abort(404);
+        }
+
+        $like->delete();
+        return response('', 204);
+    }
+
+    public function comment($mediaId)
+    {
+        $media = Media::findOrFail($mediaId);
+        $comment = $media->comments()->create([
+            'user_id' => Auth::id(),
+            'body' => request('body')
+        ]);
+
+        return response()->json(Comment::find($comment->id));
     }
 }
